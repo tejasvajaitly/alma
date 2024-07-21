@@ -4,26 +4,19 @@ This project is a Next.js application designed to demonstrate key features and f
 
 Getting Started
 Prerequisites
-Node.js (version X.X.X)
-npm (version X.X.X) or yarn (version X.X.X)
+Node.js
+npm 
 Installation
 Clone the Repository:
 
-sh
-Copy code
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
-Install Dependencies:
+git clone 
 
-sh
-Copy code
 npm install
 # or
 yarn install
 Run the Development Server:
 
-sh
-Copy code
+
 npm run dev
 # or
 yarn dev
@@ -31,8 +24,6 @@ This will start the development server on http://localhost:3000.
 
 Build for Production:
 
-sh
-Copy code
 npm run build
 # or
 yarn build
@@ -40,8 +31,7 @@ This command creates an optimized production build of your application in the .n
 
 Run the Production Server:
 
-sh
-Copy code
+
 npm start
 # or
 yarn start
@@ -66,7 +56,7 @@ ui/: A subfolder within components for UI-specific elements that can be reused a
 Design Choices
 Next.js Framework:
 
-Chosen for its server-side rendering capabilities, static site generation, and overall flexibility for building modern web applications.
+
 No State Management Library:
 
 At this stage, the application only requires simple data fetching and display, which is effectively managed by React Query.
