@@ -16,7 +16,7 @@ export default function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const limit = 10; // Items per page
+  const limit = 5; // Items per page
 
   const fetchData = async (page: number) => {
     const response = await fetch(`/api/leads?page=${page}&limit=${limit}`);

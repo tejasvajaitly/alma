@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-row h-screen">
+    <div className="flex flex-row h-full min-h-screen">
       <div className="absolute -top-[86%] -left-[30%] w-[900px] h-[900px] bg-gradient-radial from-[#c1d114] via-[#cedd26] via-[#dbe363] via-[#e4ed80]  to-transparent to-90% opacity-60 blur-2xl rounded-full -z-10"></div>
 
       <div className="flex-[0.2] flex flex-col justify-between border-r-[1px] px-8">
