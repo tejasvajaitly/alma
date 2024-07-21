@@ -20,7 +20,7 @@ export default function Page() {
 
   const limit = 5; // Items per page
 
-  const fetchData = async (page) => {
+  const fetchData = async (page: number) => {
     setLoading(true);
     try {
       const response = await fetch(`/api/leads?page=${page}&limit=${limit}`);
