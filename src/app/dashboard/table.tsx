@@ -92,6 +92,36 @@ export const columns: ColumnDef<Lead>[] = [
         </Button>
       );
     },
+    cell: ({ getValue }) => {
+      return (
+        <Select
+          onValueChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
+            console.log(v);
+          }}
+          defaultValue={getValue()}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue
+              className={`${
+                getValue() === "Pending" ? "text-red-600" : "text-green-600"
+              }`}
+              placeholder="update status"
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>select status</SelectLabel>
+              <SelectItem className="text-red-600" value="Pending">
+                Pending
+              </SelectItem>
+              <SelectItem className="text-green-600" value="Reached Out">
+                Reached Out
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      );
+    },
   },
   {
     id: "country",
