@@ -94,12 +94,7 @@ export const columns: ColumnDef<Lead>[] = [
     },
     cell: ({ getValue }) => {
       return (
-        <Select
-          onValueChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
-            console.log(v);
-          }}
-          defaultValue={getValue()}
-        >
+        <Select onValueChange={() => {}} defaultValue={getValue()}>
           <SelectTrigger className="w-[180px]">
             <SelectValue
               className={`${
