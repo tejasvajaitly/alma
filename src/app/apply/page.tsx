@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
 const visaOptions = ["O1", "EB-1A", "EB-2 NIW", "I don't know"];
 const countryOptions = ["USA", "Canada", "India", "Australia", "UK", "Others"]; // Add more countries as needed
@@ -44,22 +45,39 @@ const formSchema = z.object({
 });
 
 export default function LeadForm() {
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      linkedin: "",
-      visas: [],
+      firstName: "Tejasva",
+      lastName: "Jaitly",
+      email: "neiljaitly@gmail.com",
+      linkedin: "https://www.linkedin.com/in/tejasvajaitly/",
+      visas: ["O1"],
       resume: null,
-      country: "",
-      help: "",
+      country: "USA",
+      help: "please help",
     },
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data: any) => {
+    console.log("data", data);
+
+    const res = await fetch("/api/lead", {
+      method: "POST",
+      body: data,
+    });
+
+    const json = await res.json();
+
+    console.log("json", json);
+    const route = "http://localhost:3000/apply/success";
+    console.log("push to success page", "with route", route);
+
+    if (json.data) {
+      console.log("inside if");
+      router.push(route);
+    }
   };
 
   return (
@@ -167,7 +185,12 @@ export default function LeadForm() {
               <FormControl>
                 <input
                   type="file"
-                  onChange={(e) => field.onChange(e.target.files[0])}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      field.onChange(file);
+                    }
+                  }}
                 />
               </FormControl>
               <FormMessage />
