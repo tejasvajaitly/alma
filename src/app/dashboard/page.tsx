@@ -10,6 +10,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+import { Lead, columns, DataTable } from "./table";
+
 export default function Page() {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -146,18 +148,7 @@ export default function Page() {
   return (
     <div>
       Dashboard
-      {data && (
-        <div>
-          <h3>Data</h3>
-          <ul>
-            {data.map((item) => (
-              <li key={item.id}>
-                {item.firstName} {item.lastName}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <DataTable columns={columns} data={data} />
       <Pagination>
         <PaginationContent>
           <PaginationItem>
