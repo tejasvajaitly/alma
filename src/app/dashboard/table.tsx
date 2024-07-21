@@ -94,7 +94,7 @@ export const columns: ColumnDef<Lead>[] = [
     },
     cell: ({ getValue }) => {
       return (
-        <Select onValueChange={() => {}} defaultValue={getValue()}>
+        <Select onValueChange={() => {}} defaultValue={getValue() as string}>
           <SelectTrigger className="w-[180px]">
             <SelectValue
               className={`${
