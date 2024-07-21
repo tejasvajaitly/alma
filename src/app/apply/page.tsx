@@ -28,8 +28,8 @@ const visaOptions = ["O1", "EB-1A", "EB-2 NIW", "I don't know"];
 const countryOptions = ["USA", "Canada", "India", "Australia", "UK", "Others"]; // Add more countries as needed
 
 const formSchema = z.object({
-  firstName: z.string().nonempty({ message: "First name is required" }),
-  lastName: z.string().nonempty({ message: "Last name is required" }),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   email: z.string().email({ message: "Invalid email address" }),
   linkedin: z.string().url({ message: "Invalid LinkedIn URL" }),
   visas: z
@@ -38,10 +38,8 @@ const formSchema = z.object({
   resume: z.any().refine((file) => file instanceof File, {
     message: "Resume/CV is required",
   }),
-  country: z
-    .string()
-    .nonempty({ message: "Country of citizenship is required" }),
-  help: z.string().nonempty({ message: "This field is required" }),
+  country: z.string().min(1, "Country of citizenship is required"),
+  help: z.string().min(1, "This field is required"),
 });
 
 export default function LeadForm() {
@@ -54,18 +52,18 @@ export default function LeadForm() {
       email: "neiljaitly@gmail.com",
       linkedin: "https://www.linkedin.com/in/tejasvajaitly/",
       visas: ["O1"],
-      resume: null,
+      resume: new File([], ""), // Set resume to an empty File object
       country: "USA",
       help: "please help",
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log("data", data);
 
     const res = await fetch("/api/lead", {
       method: "POST",
-      body: data,
+      body: JSON.stringify(data),
     });
 
     const json = await res.json();
