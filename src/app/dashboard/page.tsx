@@ -15,7 +15,6 @@ import { Lead, columns, DataTable } from "./table";
 export default function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
 
   const limit = 10; // Items per page
 
@@ -149,9 +148,10 @@ export default function Page() {
 
   return (
     <div>
-      Dashboard
+      <h2 className="font-bold text-3xl">Leads</h2>
       <DataTable columns={columns} data={data} />
-      <Pagination>
+
+      <Pagination className="justify-end p-4">
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
