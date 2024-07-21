@@ -203,7 +203,7 @@ export default function LeadForm() {
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                         <FormControl>
                           <Checkbox
-                            checked={field.value.includes(visa)}
+                            checked={(field.value as string[]).includes(visa)}
                             onCheckedChange={(checked) => {
                               if (checked) {
                                 field.onChange([...field.value, visa]);
