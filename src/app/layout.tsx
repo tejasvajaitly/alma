@@ -7,6 +7,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import QueryProvider from "../query-providers";
 import "./globals.css";
 import Link from "next/link";
 
@@ -26,14 +27,16 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${inter.className}`}>
-          <SignedOut>
-            <SignInButton />
-            <Link href="/dashboard">Dashboard</Link>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          {children}
+          <QueryProvider>
+            <SignedOut>
+              <SignInButton />
+              <Link href="/dashboard">Dashboard</Link>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+            {children}
+          </QueryProvider>
         </body>
       </html>
     </ClerkProvider>

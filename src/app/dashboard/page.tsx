@@ -9,35 +9,30 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Lead, columns, DataTable } from "./table";
 
 export default function Page() {
-  const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const limit = 5; // Items per page
+  const limit = 10; // Items per page
 
   const fetchData = async (page: number) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/leads?page=${page}&limit=${limit}`);
-      const result = await response.json();
-      setData(result.data);
-      setCurrentPage(result.currentPage);
-      setTotalPages(result.totalPages);
-    } catch (error) {
-      console.error("Failed to fetch data", error);
-    } finally {
-      setLoading(false);
-    }
+    const response = await fetch(`/api/leads?page=${page}&limit=${limit}`);
+    const json = await response.json();
+    if (json.error) throw new Error("Network response was not ok");
+    setTotalPages(json.totalPages);
+    console.log(json);
+    return json.data;
   };
 
-  useEffect(() => {
-    fetchData(currentPage);
-  }, [currentPage]);
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["lead", currentPage, limit],
+    queryFn: () => fetchData(currentPage),
+    placeholderData: keepPreviousData,
+  });
 
   const handlePrevious = () => {
     if (currentPage > 1) {
@@ -72,7 +67,6 @@ export default function Page() {
         );
       }
     } else {
-      // Dynamic pagination display
       let startPage = currentPage - 1;
       let endPage = currentPage + 1;
 
@@ -144,6 +138,14 @@ export default function Page() {
 
     return pages;
   };
+
+  if (isPending) {
+    return <span>Loading...</span>;
+  }
+
+  if (isError) {
+    return <span>Error: {error.message}</span>;
+  }
 
   return (
     <div>
