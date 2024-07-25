@@ -1,0 +1,93 @@
+{
+  "header": {
+    "title": "Get an assessment of your immigration case",
+    "backgroundImage": "/alma-header-bg-img.jpg",
+    "logo": "/logo.svg"
+  },
+  "intro": {
+    "title": "Want to understand your visa options?",
+    "description": "Submit the form below and our team of experienced attorneys will review your information and send a preliminary assessment of your case based on your goals.",
+    "image": "/file-info.png"
+  },
+  "fields": [
+    {
+      "name": "firstName",
+      "type": "text",
+      "placeholder": "First Name",
+      "validation": {
+        "required": "First name is required"
+      }
+    },
+    {
+      "name": "lastName",
+      "type": "text",
+      "placeholder": "Last Name",
+      "validation": {
+        "required": "Last name is required"
+      }
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "placeholder": "Email",
+      "validation": {
+        "required": "Email is required",
+        "pattern": {
+          "value": "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
+          "message": "Invalid email address"
+        }
+      }
+    },
+    {
+      "name": "linkedin",
+      "type": "url",
+      "placeholder": "LinkedIn URL",
+      "validation": {
+        "required": "LinkedIn URL is required",
+        "pattern": {
+          "value": "^https://[a-z]{2,3}\\.linkedin\\.com/.*$",
+          "message": "Invalid LinkedIn URL"
+        }
+      }
+    },
+    {
+      "name": "resume",
+      "type": "file",
+      "validation": {
+        "required": "Resume/CV is required"
+      }
+    },
+    {
+      "name": "visas",
+      "type": "checkbox",
+      "options": ["O1", "EB-1A", "EB-2 NIW", "I don't know"],
+      "title": "Visa categories of interest?",
+      "image": "/assessment-dice.png",
+      "validation": {
+        "required": "At least one visa must be selected"
+      }
+    },
+    {
+      "name": "country",
+      "type": "select",
+      "options": ["USA", "Canada", "India", "Australia", "UK", "Others"],
+      "placeholder": "Select your country",
+      "validation": {
+        "required": "Country of citizenship is required"
+      }
+    },
+    {
+      "name": "help",
+      "type": "textarea",
+      "title": "How can we help you?",
+      "image": "/assessment-heart.png",
+      "placeholder": "What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permanent residency or short-term employment visa or both? Are there any timeline considerations?",
+      "validation": {
+        "required": "This field is required"
+      }
+    }
+  ],
+  "submitButton": {
+    "text": "Submit"
+  }
+}

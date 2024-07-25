@@ -26,78 +26,253 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import formConfig from "./formConfig.json";
 
-const visaOptions = ["O1", "EB-1A", "EB-2 NIW", "I don't know"];
-const countryOptions = ["USA", "Canada", "India", "Australia", "UK", "Others"]; // Add more countries as needed
+type FormField = {
+  name: string;
+  type: "text" | "email" | "url" | "file" | "checkbox" | "select" | "textarea";
+  placeholder?: string;
+  title?: string;
+  image?: string;
+  options?: string[];
+  validation: {
+    required: string;
+    pattern?: {
+      value: string;
+      message: string;
+    };
+  };
+};
 
-const formSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email({ message: "Invalid email address" }),
-  linkedin: z.string().url({ message: "Invalid LinkedIn URL" }),
-  visas: z
-    .array(z.string())
-    .min(1, { message: "At least one visa must be selected" }),
-  resume: z.any().refine((file) => file instanceof File, {
-    message: "Resume/CV is required",
-  }),
-  country: z.string().min(1, "Country of citizenship is required"),
-  help: z.string().min(1, "This field is required"),
-});
+// Generate Zod schema dynamically based on the configuration
+const generateZodSchema = (fields: FormField[]) => {
+  const schemaObject: { [key: string]: z.ZodType<any> } = {}; // Add type annotation for schemaObject
+  fields.forEach((field) => {
+    let fieldSchema = z.string();
+    if (field.validation.required) {
+      fieldSchema = fieldSchema.min(1, field.validation.required);
+    }
+    if (field.type === "email") {
+      fieldSchema = fieldSchema.email({
+        message: field?.validation?.pattern?.message,
+      });
+    }
+    if (field.type === "url") {
+      fieldSchema = fieldSchema.url({
+        message: field?.validation?.pattern?.message,
+      });
+    }
+    if (field.type === "file") {
+      fieldSchema = z.any().refine((file) => file instanceof File, {
+        message: field.validation.required,
+      });
+    }
+    if (field.type === "checkbox") {
+      fieldSchema = z
+        .array(z.string())
+        .min(1, { message: field.validation.required });
+    }
+    schemaObject[field.name] = fieldSchema;
+  });
+  return z.object(schemaObject);
+};
+
+const formSchema = generateZodSchema(
+  formConfig.fields.map((field: FormField) => ({
+    ...field,
+  }))
+);
 
 export default function LeadForm() {
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      linkedin: "",
-      visas: [],
-      resume: new File([], ""), // Set resume to an empty File object
-      country: "",
-      help: "",
-    },
+    defaultValues: formConfig.fields.reduce(
+      (acc: { [key: string]: string | string[] }, field) => {
+        acc[field.name] = field.type === "checkbox" ? [] : "";
+        return acc;
+      },
+      {}
+    ),
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log("data", data);
-
+    const formData = new FormData();
+    Object.keys(data).forEach((key) => {
+      if (key === "file" && data[key] instanceof File) {
+        formData.append(key, data[key] as File);
+      } else {
+        formData.append(key, data[key] as string);
+      }
+    });
+    console.log("formData", formData);
     const res = await fetch("/api/lead", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: formData,
     });
-
     const json = await res.json();
-
     console.log("json", json);
-    const route = "http://localhost:3000/apply/success";
-    console.log("push to success page", "with route", route);
-
     if (json.data) {
-      console.log("inside if");
-      router.push(route);
+      router.push("http://localhost:3000/apply/success");
+    }
+  };
+
+  const renderField = (field: FormField): JSX.Element | null => {
+    switch (field.type) {
+      case "text":
+      case "email":
+      case "url":
+        return (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            render={({ field: formField }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    {...formField}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
+      case "file":
+        return (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            render={({ field: formField }) => (
+              <FormItem>
+                <FormControl>
+                  <FileUploadDropzone
+                    onChange={(file) => formField.onChange(file)}
+                    name={formField.name}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
+      case "checkbox":
+        return (
+          <FormItem key={field.name}>
+            <h3 className="text-center text-2xl font-bold">{field.title}</h3>
+            <div className="space-y-2">
+              {field?.options?.map((option) => (
+                <FormField
+                  key={option}
+                  control={form.control}
+                  name={field.name}
+                  render={({ field: formField }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={(formField.value as string[]).includes(
+                            option
+                          )}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              formField.onChange([
+                                ...(formField.value as string[]),
+                                option,
+                              ]);
+                            } else {
+                              formField.onChange(
+                                (formField.value as string[]).filter(
+                                  (value) => value !== option
+                                )
+                              );
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel>{option}</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+            <FormMessage />
+          </FormItem>
+        );
+      case "select":
+        return (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            render={({ field: formField }) => (
+              <FormItem>
+                <FormControl>
+                  <Select
+                    onValueChange={formField.onChange}
+                    defaultValue={formField.value[0]}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={field.placeholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {field.options?.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
+      case "textarea":
+        return (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            render={({ field: formField }) => (
+              <FormItem>
+                <FormControl>
+                  <Textarea
+                    className="h-28"
+                    placeholder={field.placeholder}
+                    {...formField}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        );
+      default:
+        return null;
     }
   };
 
   return (
     <div>
-      <header className="position relative lg:h-[380px]  xl:h-[490px] bg-[#D9DEA5] -z-20">
+      <header className="position relative lg:h-[380px] xl:h-[490px] bg-[#D9DEA5] -z-20">
         <img
           className="-z-10 h-full bg-[#D9DEA5] w-full object-cover object-left absolute top-0 -left-20 sm:left-0"
-          src="/alma-header-bg-img.jpg"
+          src={formConfig.header.backgroundImage}
           alt=""
         />
         <div className="ml-20 sm:ml-40 md:ml-56 lg:ml-80 xl:ml-[325px] flex flex-col justify-center pt-8 lg:pt-14 xl:pt-24 mr-8">
           <h1>
-            <img src="/logo.svg" alt="Alma" />
+            <img src={formConfig.header.logo} alt="Alma" />
             <span className="sr-only">Alma</span>
           </h1>
           <h2 className="text-2xl sm:text-3xl lg:text-5xl xl:text-[56px] font-extrabold mt-4 lg:mt-10 mb-8">
-            Get an assessment
-            <br />
-            of your immigration case
+            {formConfig.header.title}
           </h2>
         </div>
       </header>
@@ -108,202 +283,18 @@ export default function LeadForm() {
             className="space-y-8 w-1/3"
           >
             <div className="flex items-center justify-center">
-              <img src="/file-info.png" alt="" />
+              <img src={formConfig.intro.image} alt="" />
             </div>
             <h3 className="text-center text-2xl font-bold">
-              Want to understand your visa options?
+              {formConfig.intro.title}
             </h3>
             <p className="text-center text-lg">
-              Submit the form below and our team of experienced attorneys will
-              review your information and send a preliminary assessment of your
-              case based on your goals.
+              {formConfig.intro.description}
             </p>
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="First Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Last Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input type="email" placeholder="Email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="linkedin"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="LinkedIn URL" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="resume"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <FileUploadDropzone
-                      onChange={(file) => field.onChange(file)}
-                      name={field.name}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex items-center justify-center">
-              <img src="/assessment-dice.png" alt="" />
-            </div>
-            <h3 className="text-center text-2xl font-bold">
-              Visa categories of interest?
-            </h3>
-            <FormItem>
-              <div className="space-y-2">
-                {visaOptions.map((visa) => (
-                  <FormField
-                    key={visa}
-                    control={form.control}
-                    name="visas"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={(field.value as string[]).includes(visa)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                field.onChange([...field.value, visa]);
-                              } else {
-                                field.onChange(
-                                  field.value.filter((value) => value !== visa)
-                                );
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel>{visa}</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-              {form.formState.errors.visas && (
-                <p className="text-red-600">
-                  {form.formState.errors.visas.message}
-                </p>
-              )}
-            </FormItem>
-
-            {/* <FormField
-              control={form.control}
-              name="resume"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Resume/CV</FormLabel>
-                  <FormControl>
-                    <input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          field.onChange(file);
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
-
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countryOptions.map((country) => (
-                          <SelectItem key={country} value={country}>
-                            {country}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex items-center justify-center">
-              <img src="/assessment-heart.png" alt="" />
-            </div>
-            <h3 className="text-center text-2xl font-bold">
-              How can we help you?
-            </h3>
-
-            <FormField
-              control={form.control}
-              name="help"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      className="h-28"
-                      placeholder="What is your current status and when does it expire? What is your past immigration history? Are you looking for long-term permanent residencyor short-term employment visa or both? Are there any timeline considerations?"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            {formConfig.fields.map(renderField)}
             <div>
               <Button className="w-full" type="submit">
-                Submit
+                {formConfig.submitButton.text}
               </Button>
             </div>
           </form>
@@ -332,7 +323,14 @@ const FileUploadDropzone = ({
     [onChange]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "application/pdf": [".pdf"],
+    },
+    maxFiles: 1,
+    multiple: false,
+  });
 
   return (
     <div>

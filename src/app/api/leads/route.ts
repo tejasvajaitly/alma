@@ -1,5 +1,8 @@
+import { sql } from "drizzle-orm";
+import { db } from "@/db/index";
+import { leads } from "@/db/schemas/schemas";
+
 export async function GET(request: Request) {
-  // Extract query parameters for page and limit
   const url = new URL(request.url);
   const pageParam = url.searchParams.get("page");
   const limitParam = url.searchParams.get("limit");
@@ -10,20 +13,26 @@ export async function GET(request: Request) {
   const page = pageParam ? parseInt(pageParam, 10) : 1;
   const limit = limitParam ? parseInt(limitParam, 10) : 5;
 
-  // Calculate start and end indices for slicing the data
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
+  const offset = (page - 1) * limit;
 
-  // Slice the data to get the paginated results
-  const paginatedData = mockData.slice(startIndex, endIndex);
+  const paginatedData = await db
+    .select()
+    .from(leads)
+    .limit(limit)
+    .offset(offset);
 
-  // Return the paginated data along with pagination info
+  const [{ count }] = await db
+    .select({
+      count: sql<number>`count(*)`,
+    })
+    .from(leads);
+
   return new Response(
     JSON.stringify({
       data: paginatedData,
       currentPage: page,
-      totalPages: Math.ceil(mockData.length / limit),
-      totalItems: mockData.length,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
     }),
     {
       headers: { "Content-Type": "application/json" },

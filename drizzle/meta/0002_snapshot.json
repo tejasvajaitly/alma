@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ca7503f0-7318-49d9-9eea-626160e61077",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "fb66a92c-95bc-45d2-8e10-6eac7227cf79",
+  "prevId": "cea6cebf-e07f-45cf-8bd2-aa6de8ecfd46",
   "tables": {
     "leads": {
       "name": "leads",
@@ -86,15 +86,7 @@
           "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {
-        "leads_email_unique": {
-          "name": "leads_email_unique",
-          "columns": [
-            "email"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

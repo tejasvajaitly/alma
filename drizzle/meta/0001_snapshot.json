@@ -1,59 +1,9 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6e21734a-d70b-4b0b-a1df-ab5e7473128b",
-  "prevId": "8b4fb4e5-f988-4b25-ada1-1ad4b262a35c",
+  "id": "cea6cebf-e07f-45cf-8bd2-aa6de8ecfd46",
+  "prevId": "ca7503f0-7318-49d9-9eea-626160e61077",
   "tables": {
-    "lead_visa_types": {
-      "name": "lead_visa_types",
-      "columns": {
-        "lead_id": {
-          "name": "lead_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "visa_type_id": {
-          "name": "visa_type_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "lead_visa_types_lead_id_leads_id_fk": {
-          "name": "lead_visa_types_lead_id_leads_id_fk",
-          "tableFrom": "lead_visa_types",
-          "tableTo": "leads",
-          "columnsFrom": [
-            "lead_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "lead_visa_types_visa_type_id_visa_types_id_fk": {
-          "name": "lead_visa_types_visa_type_id_visa_types_id_fk",
-          "tableFrom": "lead_visa_types",
-          "tableTo": "visa_types",
-          "columnsFrom": [
-            "visa_type_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "leads": {
       "name": "leads",
       "columns": {
@@ -63,119 +13,9 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
-        },
-        "first_name": {
-          "name": "first_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "last_name": {
-          "name": "last_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "email": {
-          "name": "email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "linkedin_url": {
-          "name": "linkedin_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "resume": {
-          "name": "resume",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "country": {
-          "name": "country",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "visa_type": {
-          "name": "visa_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "customer_message": {
-          "name": "customer_message",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {
-        "leads_email_unique": {
-          "name": "leads_email_unique",
-          "columns": [
-            "email"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "visa_types": {
-      "name": "visa_types",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "visa_types_type_unique": {
-          "name": "visa_types_type_unique",
-          "columns": [
-            "type"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

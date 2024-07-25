@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ca7503f0-7318-49d9-9eea-626160e61077",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "83c0dbc9-9b17-4f2e-aa9b-7df99e6aaa80",
+  "prevId": "fb66a92c-95bc-45d2-8e10-6eac7227cf79",
   "tables": {
     "leads": {
       "name": "leads",
@@ -79,22 +79,14 @@
         },
         "submitted_at": {
           "name": "submitted_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(CURRENT_DATE)"
         }
       },
-      "indexes": {
-        "leads_email_unique": {
-          "name": "leads_email_unique",
-          "columns": [
-            "email"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

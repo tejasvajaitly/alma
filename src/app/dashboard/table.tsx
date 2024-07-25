@@ -33,8 +33,13 @@ import {
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
+
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 export type Lead = {
+  id?: string;
   firstName: string;
   lastName: string;
   submittedOn: string;
@@ -45,6 +50,115 @@ export type Lead = {
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+}
+
+interface UpdateStatusData {
+  id: string;
+  status: string;
+}
+
+export const updateLeadStatus = async (
+  data: UpdateStatusData
+): Promise<any> => {
+  const response = await fetch("/api/lead", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (response.status !== 200) {
+    throw new Error("Network response was not ok");
+  }
+
+  return response.json();
+};
+
+const fetchResume = async (resumeName: string) => {
+  const response = await fetch(`/api/resume?resume=${resumeName}`);
+
+  if (!response) {
+    throw new Error("Network response was not ok");
+  }
+  return response.blob();
+};
+
+function ResumeStatusSelect({ id, value }) {
+  const { isPending, submittedAt, variables, mutate, isError } = useMutation({
+    mutationFn: (data: UpdateStatusData) => updateLeadStatus(data),
+    onError: (error) => {
+      toast.error("Error updating status");
+    },
+    onSuccess: () => {
+      toast.success("Status updated successfully");
+    },
+  });
+
+  return (
+    <Select
+      onValueChange={(v) => {
+        mutate({ id: id, status: v });
+      }}
+      defaultValue={value}
+    >
+      <SelectTrigger className="w-[180px]">
+        <SelectValue
+          className={`${
+            value === "Pending" ? "text-red-600" : "text-green-600"
+          }`}
+          placeholder="update status"
+        />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>select status</SelectLabel>
+          <SelectItem className="text-red-600" value="Pending">
+            Pending
+          </SelectItem>
+          <SelectItem className="text-green-600" value="Reached Out">
+            Reached Out
+          </SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}
+
+function ResumeDownloadButton({ resumeName }: { resumeName: string }) {
+  const {
+    data: resume,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["resume", resumeName],
+    queryFn: () => fetchResume(resumeName),
+    enabled: false,
+  });
+
+  const handleDownload = async () => {
+    await refetch();
+    console.log("resume", resume);
+    const url = window.URL.createObjectURL(new Blob([resume]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${resumeName}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={handleDownload}
+      disabled={isLoading}
+    >
+      {isLoading ? "..." : <Download />}
+    </Button>
+  );
 }
 
 export const columns: ColumnDef<Lead>[] = [
@@ -65,7 +179,7 @@ export const columns: ColumnDef<Lead>[] = [
   },
   {
     id: "submittedOn",
-    accessorFn: (row) => new Date(row.submittedOn).toLocaleString(),
+    accessorKey: "submittedAt",
     header: ({ column }) => {
       return (
         <Button
@@ -92,30 +206,10 @@ export const columns: ColumnDef<Lead>[] = [
         </Button>
       );
     },
-    cell: ({ getValue }) => {
-      return (
-        <Select onValueChange={() => {}} defaultValue={getValue() as string}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue
-              className={`${
-                getValue() === "Pending" ? "text-red-600" : "text-green-600"
-              }`}
-              placeholder="update status"
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>select status</SelectLabel>
-              <SelectItem className="text-red-600" value="Pending">
-                Pending
-              </SelectItem>
-              <SelectItem className="text-green-600" value="Reached Out">
-                Reached Out
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      );
+    cell: ({ row, getValue }) => {
+      const value = getValue() as string;
+      const id = row.original.id;
+      return <ResumeStatusSelect id={id} value={value} />;
     },
   },
   {
@@ -131,6 +225,14 @@ export const columns: ColumnDef<Lead>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+  },
+  {
+    id: "resume",
+    accessorKey: "resume",
+    cell: ({ getValue }) => {
+      const resumeName = getValue() as string;
+      return <ResumeDownloadButton resumeName={resumeName} />;
     },
   },
 ];
