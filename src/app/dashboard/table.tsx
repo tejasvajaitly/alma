@@ -138,15 +138,21 @@ function ResumeDownloadButton({ resumeName }: { resumeName: string }) {
   });
 
   const handleDownload = async () => {
-    await refetch();
-    console.log("resume", resume);
-    const url = window.URL.createObjectURL(new Blob([resume]));
+    const { data } = await refetch();
+    if (!data) {
+      console.error("Failed to fetch resume data");
+      return;
+    }
+
+    const blob = new Blob([data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", `${resumeName}.pdf`);
     document.body.appendChild(link);
     link.click();
     link.remove();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
