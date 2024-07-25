@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     headers.set("Content-Disposition", `inline; filename="${resume}"`);
 
     // Return the response with the stream and headers
-    return new Response(stream, {
+    return new Response(stream as unknown as BodyInit, {
       headers: headers,
     });
   } catch (e) {
