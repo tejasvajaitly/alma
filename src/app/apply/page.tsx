@@ -114,7 +114,7 @@ export default function LeadForm() {
     const json = await res.json();
     console.log("json", json);
     if (json.data) {
-      router.push("http://localhost:3000/apply/success");
+      router.push("/apply/success");
     }
   };
 
